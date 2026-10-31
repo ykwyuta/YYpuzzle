@@ -14,12 +14,12 @@
   <meta name="apple-mobile-web-app-title" content="あわパズル">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="solo">
   <header class="topbar">
-    <h1 class="title"><span class="t-sub">はじけるのがみえる</span><span class="t-main">あわパズル</span></h1>
+    <h1 class="title"><span class="t-sub">はじけるのがみえる</span><span class="t-main" aria-label="あわパズル"><i class="c1">あ</i><i class="c2">わ</i><i class="c3">パ</i><i class="c4">ズ</i><i class="c5">ル</i></span></h1>
     <nav class="top-actions">
       <button id="btn-pause" type="button" class="chip">とめる</button>
       <button id="btn-guide" type="button" class="chip">ルール</button>
@@ -65,6 +65,12 @@
       <button id="btn-undo" type="button" class="big">まった</button>
     </div>
   </main>
+
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="sp-side sp-l"><div class="sp-face" id="sp-me"></div><b id="sp-me-name">あなた</b></div>
+    <div class="sp-vs">VS</div>
+    <div class="sp-side sp-r"><div class="sp-face" id="sp-opp"></div><b id="sp-opp-name"></b></div>
+  </div>
 
   <div class="toast" id="toast" aria-live="polite"></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
@@ -169,6 +175,7 @@
       <h2>せってい</h2>
       <label class="toggle"><input type="checkbox" name="ghost"><span>おちる ばしょ を みせる</span></label>
       <label class="toggle"><input type="checkbox" name="preview"><span>はじける よそう（はじける あわを ひからせる）</span></label>
+      <label class="toggle"><input type="checkbox" name="faces"><span>あわに かお（にっこり・まばたき）</span></label>
       <label class="toggle"><input type="checkbox" name="marks"><span>あわに マーク（いろが わかりにくい ときに）</span></label>
       <label class="toggle"><input type="checkbox" name="sound"><span>おと</span></label>
       <label class="toggle"><input type="checkbox" name="vibrate"><span>ぶるっと ふるえる（くもりあわが ふったとき）</span></label>
