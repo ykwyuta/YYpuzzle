@@ -13,7 +13,10 @@ const { match } = require('./match.js');
   assert.strictEqual(a.colors.length, 4);
   const first = new Set([...a.at(0), ...a.at(1)]);
   assert.ok(first.size <= 3, 'さいしょの 2くみは 3しょく まで');
-  for (let i = 0; i < 200; i++) for (const c of a.at(i)) assert.ok(a.colors.includes(c));
+  let rb = 0;
+  for (let i = 0; i < 400; i++) for (const c of a.at(i)) { if (c === E.RAINBOW) rb++; else assert.ok(a.colors.includes(c)); }
+  assert.ok(rb > 10 && rb < 60, 'にじあわ は ときどき まざる ' + rb);
+  for (let i = 0; i < 3; i++) assert.ok(!a.at(i).includes(E.RAINBOW), 'さいしょの 3くみ には まざらない');
   console.log('queue OK');
 }
 
@@ -123,6 +126,61 @@ const { match } = require('./match.js');
   assert.ok(E.isDead(d3.field));
   assert.strictEqual(d3.field[E.at(0, 0)], 0);
   console.log('clouds OK');
+}
+
+// にじあわ：どの いろとも つながる・ふたいろ いっしょに はじけさせる・にじあわ だけ では はじけない
+{
+  let r = E.resolve(E.parse(['RR*R..']));
+  assert.strictEqual(r.chain, 1, 'にじあわ が あか の なかまに なる');
+  assert.strictEqual(r.steps[0].popped.length, 4);
+  r = E.resolve(E.parse(['RR*BB.', 'R..B..']));
+  assert.strictEqual(r.chain, 1);
+  assert.strictEqual(r.steps[0].groups.length, 2, 'あか と あお が にじあわ で いっしょに はじける');
+  assert.strictEqual(r.steps[0].popped.length, 7, 'にじあわ は 1かい だけ かぞえる');
+  assert.strictEqual(E.resolve(E.parse(['****..'])).chain, 0, 'にじあわ だけ では はじけない');
+  assert.strictEqual(E.resolve(E.parse(['R*G*B.'])).chain, 0);
+  console.log('rainbow OK');
+}
+
+// フルーツパワー
+{
+  const P = (id, rows, ctx) => E.power(id, E.parse(rows), ctx);
+  // いちご：くもりあわ が あか に
+  let o = P('ichigo', ['oo....', 'oRR...']);
+  assert.strictEqual(o.recolor.length, 3);
+  assert.strictEqual(E.resolve(o.field).chain, 1, 'あかく なって 5こ つながる');
+  // にんじん：いちばん ながい れつ を けす
+  o = P('ninjin', ['.G....', '.G....', 'RG....', 'RG..Y.']);
+  assert.strictEqual(o.cleared.length, 4);
+  assert.deepStrictEqual(E.heights(o.field), [2, 0, 0, 0, 1, 0]);
+  for (const i of o.cleared) assert.ok(o.before[i], 'before には けす まえの あわが ある');
+  // トマト：いちばん おおい いろ が ぜんぶ はじける（はなれていても）
+  o = P('tomato', ['B...B.', 'GY.BGY']);
+  assert.strictEqual(o.force.color, 3);
+  const r = E.resolve(o.field, o.force);
+  assert.strictEqual(r.steps[0].popped.length, 3);
+  assert.ok(r.points > 0);
+  // バナナ・なす：つぎの ふたつぐみ を かえる
+  assert.deepStrictEqual(P('banana', ['R.....']).over, { kind: 'rainbow', n: 2 });
+  assert.deepStrictEqual(P('nasu', ['R.....']).over, { kind: 'same', n: 3 });
+  assert.deepStrictEqual(E.overPair('same', [2, 4]), [2, 2]);
+  assert.deepStrictEqual(E.overPair('same', [E.RAINBOW, 4]), [4, 4]);
+  assert.deepStrictEqual(E.overPair('rainbow', [2, 4]), [E.RAINBOW, E.RAINBOW]);
+  // ブロッコリー：くもりあわ が きえて、うえの あわが おちる
+  o = P('broccoli', ['R.....', 'o.....', 'oG....']);
+  assert.ok(o.cancel);
+  assert.strictEqual(o.cleared.length, 2);
+  assert.strictEqual(o.field[E.at(0, 12)], 1, 'あか が したまで おちる');
+  // ぶどう：いちばん すくない いろ（G）が となりの いろ に そまる
+  o = P('budou', ['RRR...', 'RRRG..', 'BBBB.Y', 'BBBBYY']);
+  assert.strictEqual(o.field[E.at(3, 10)], 1, 'G は となりの あか に');
+  // かぼちゃ：でてくる ところ の まわり を ふきとばす
+  o = P('kabocha', Array(10).fill('RGBYPR'));
+  assert.deepStrictEqual(E.heights(o.field), [10, 5, 5, 5, 10, 10]);
+  assert.ok(E.powerUseful('kabocha', E.parse(Array(10).fill('RGBYPR')), 0));
+  assert.ok(!E.powerUseful('broccoli', E.newField(), 0));
+  for (const id of Object.keys(E.POWERS)) assert.ok(E.power(id, E.newField()).field, 'からっぽ でも つかえる ' + id);
+  console.log('power OK');
 }
 
 // CPU：おける ところ・れんさを みつける・まけない

@@ -44,6 +44,7 @@
           <div class="opp-face" id="opp-face"></div>
           <div class="speech" id="speech"></div>
           <div class="opp-name" id="opp-name"></div>
+          <div class="pgauge" id="pg-1" title="フルーツパワー"><i></i></div>
           <div class="pend small" id="pend-1" aria-label="あいてに とどく くもりあわ"></div>
           <div class="well small"><canvas id="cv-1" aria-label="あいての ばめん"></canvas></div>
         </div>
@@ -62,6 +63,7 @@
     </div>
     <div class="controls">
       <button id="btn-hint" type="button" class="big hint">ヒント</button>
+      <button id="btn-power" type="button" class="big power" aria-label="フルーツパワー"><span class="pw-fill" id="pw-fill"></span><span class="pw-label" id="pw-label">パワー</span></button>
       <button id="btn-undo" type="button" class="big">まった</button>
     </div>
   </main>
@@ -108,8 +110,9 @@
         </div>
       </fieldset>
       <fieldset>
-        <legend>あなたの キャラクター</legend>
+        <legend>あなたの キャラクター（えらんだ キャラの フルーツパワー が つかえるよ）</legend>
         <div class="char-grid mini" id="me-grid"></div>
+        <p class="opp-intro" id="me-intro"></p>
       </fieldset>
       <div class="dlg-buttons">
         <button value="cancel" type="submit" id="btn-new-cancel">やめる</button>
@@ -160,6 +163,13 @@
           <li><b>つながり</b>：となりあう おなじ いろの あわは、くっついて みえるよ。あと いくつで はじけるか わかるね。</li>
           <li><b>ヒント</b>：まよったら おしてみよう。おすすめの ばしょが てんせんで でるよ。</li>
           <li><b>まった</b>：ひとりで あそぶ ときは、おいた あわを なんかいでも もどせるよ。</li>
+        </ul>
+      </section>
+      <section>
+        <h3>にじあわ と フルーツパワー</h3>
+        <ul>
+          <li><b>にじあわ</b>：ときどき くる にじいろの あわ。となりの どの いろの なかまにも なるよ。2つの いろの あいだに おくと、りょうほう いっしょに はじけさせる ことも できる！</li>
+          <li><b>フルーツパワー</b>：あわを はじけさせると「パワー」ボタンに たまっていくよ。いっぱいに なったら おしてみよう。えらんだ キャラクター ごとに ちがう わざ が でるよ。</li>
         </ul>
       </section>
       <section>
