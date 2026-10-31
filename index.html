@@ -29,6 +29,12 @@
 
   <main class="layout" id="layout">
     <div class="arena" id="arena">
+      <div class="zones" id="zones" aria-hidden="true">
+        <div data-z="L"><b>◀</b><small>ひだり</small></div>
+        <div data-z="C"><b>⟳</b><small>まわす</small></div>
+        <div data-z="R"><b>▶</b><small>みぎ</small></div>
+        <div data-z="H"><b>⤓</b><small>すとん</small></div>
+      </div>
       <section class="side-me" aria-label="あなたの ばめん">
         <div class="phead" id="head-0"></div>
         <div class="pend" id="pend-0" aria-label="とどく くもりあわ"></div>
@@ -54,11 +60,10 @@
     <div class="status" id="status" role="status" aria-live="polite"></div>
 
     <div class="pad" id="pad">
-      <button type="button" data-act="A" aria-label="ひだりに まわす"><i>⟲</i><small>まわす</small></button>
       <button type="button" data-act="L" aria-label="ひだりへ"><i>◀</i><small>ひだり</small></button>
-      <button type="button" data-act="D" aria-label="はやく おとす"><i>▼</i><small>はやく</small></button>
+      <button type="button" data-act="C" aria-label="まわす"><i>⟳</i><small>まわす</small></button>
       <button type="button" data-act="R" aria-label="みぎへ"><i>▶</i><small>みぎ</small></button>
-      <button type="button" data-act="C" aria-label="みぎに まわす"><i>⟳</i><small>まわす</small></button>
+      <button type="button" data-act="D" aria-label="はやく おとす"><i>▼</i><small>はやく</small></button>
       <button type="button" data-act="H" aria-label="すとんと おとす" class="drop"><i>⤓</i><small>すとん</small></button>
     </div>
     <div class="controls">
@@ -148,12 +153,13 @@
       <section>
         <h3>ふたつぐみを うごかす</h3>
         <ul>
-          <li><b>◀ ▶</b>：ひだり・みぎに うごかす</li>
-          <li><b>⟲ ⟳</b>：くるっと まわす（かべの そばでも まわせるよ）</li>
-          <li><b>▼</b>：おしている あいだ はやく おちる。<b>⤓ すとん</b>：いっきに おとす</li>
+          <li><b>がめんの ひだりがわ</b> を タップ：ひだりに うごく（おしたままで つづけて うごく）</li>
+          <li><b>がめんの みぎがわ</b> を タップ：みぎに うごく</li>
+          <li><b>まんなか</b> を タップ：くるっと まわす（かべの そばでも まわせるよ）</li>
+          <li><b>した</b> の ほう を タップ：すとんと おとす</li>
         </ul>
-        <p>ばめんを <b>ゆびで なぞって</b> も うごかせるよ。よこに なぞると いどう、タッチで まわす、したに はらうと すとん。</p>
-        <p>キーボード：← → いどう、↑ か X で まわす、Z で ぎゃくに まわす、↓ で はやく、スペースで すとん、P で とめる。</p>
+        <p>したの ボタンでも うごかせるよ。<b>▼</b> は おしている あいだ はやく おちる。</p>
+        <p>キーボード：← → いどう、↑ か X か Z で まわす、↓ で はやく、スペースで すとん、Enter で パワー、P で とめる。</p>
       </section>
       <section>
         <h3>みえる おたすけ</h3>

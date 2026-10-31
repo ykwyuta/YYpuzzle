@@ -87,7 +87,24 @@ button:disabled { cursor: default; opacity: 0.45; }
 
 /* ---------- 全体の並び ---------- */
 .layout { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 var(--gutter) 12px; }
-.arena { display: flex; gap: 8px; align-items: flex-start; justify-content: center; }
+.arena { position: relative; display: flex; gap: 8px; align-items: flex-start; justify-content: center; touch-action: none; }
+/* タップの ばしょ（はじめに すこし みせる・タップすると ひかる） */
+.zones {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 3fr 1fr; gap: 4px;
+}
+.zones div {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border-radius: 18px; border: 3px dashed rgba(255, 255, 255, 0.9); background: rgba(124, 77, 255, 0.28);
+  color: #fff; opacity: 0; text-shadow: 0 2px 0 rgba(40, 20, 90, 0.5);
+}
+.zones div[data-z="H"] { grid-column: 1 / -1; background: rgba(255, 138, 0, 0.32); }
+.zones b { font-size: 34px; line-height: 1; }
+.zones small { font-size: 13px; font-weight: 900; }
+.zones.show div { animation: zguide 2.6s ease-in-out both; }
+.zones div.hit { animation: zhit 0.28s ease-out; }
+@keyframes zguide { 0%, 100% { opacity: 0; } 12%, 75% { opacity: 1; } }
+@keyframes zhit { from { opacity: 0.45; } to { opacity: 0; } }
 .side-me, .side-col { display: flex; flex-direction: column; gap: 4px; }
 .side-col { align-items: stretch; }
 .well {
@@ -191,7 +208,7 @@ body.solo .opp { display: none; }
 @keyframes wiggle { 25% { transform: rotate(-1.5deg) scale(1.03); } 50% { transform: rotate(1.5deg) scale(1.03); } 75% { transform: rotate(-0.5deg); } }
 
 /* ---------- そうさ ボタン（キャンディ） ---------- */
-.pad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; width: 100%; max-width: 520px; }
+.pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 520px; }
 .pad button {
   --b1: #8fd3ff; --b2: #2f9bff; --b3: #1569c7;
   min-height: 60px; border-radius: 20px; border: 3px solid #fff; color: #fff;

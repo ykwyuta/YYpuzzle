@@ -94,6 +94,7 @@
     syncPause();
     renderHeads();
     layout();
+    setTimeout(showZones, vs ? 1500 : 0);
     if (vs) {
       setOppMood('normal');
       splash();
@@ -1339,7 +1340,7 @@
     document.addEventListener('keydown', e => {
       if (document.querySelector('dialog[open]')) return;
       const k = e.key;
-      const map = { ArrowLeft: 'L', ArrowRight: 'R', ArrowDown: 'D', ArrowUp: 'C', x: 'C', X: 'C', z: 'A', Z: 'A', ' ': 'H' };
+      const map = { ArrowLeft: 'L', ArrowRight: 'R', ArrowDown: 'D', ArrowUp: 'C', x: 'C', X: 'C', z: 'C', Z: 'C', ' ': 'H' };
       if (k === 'p' || k === 'P' || k === 'Escape') { togglePause(); e.preventDefault(); return; }
       if (k === 'Enter' || k === 's' || k === 'S') { usePower(me()); e.preventDefault(); return; }
       const a = map[k];
@@ -1352,35 +1353,45 @@
       const map = { ArrowLeft: 'L', ArrowRight: 'R', ArrowDown: 'D' };
       if (map[e.key]) release(map[e.key]);
     });
-    // ばめんを なぞる：よこ = いどう、タッチ = まわす、したに はらう = すとん、したに ひっぱる = はやく
-    const cv = $('cv-0');
-    let g = null;
-    cv.addEventListener('pointerdown', e => {
+    // がめんを タップ：ひだりがわ = ひだりへ、みぎがわ = みぎへ、まんなか = まわす、した = すとん
+    // （ひだり・みぎ は おしたままに すると つづけて うごく）
+    const arena = $('arena');
+    const touching = new Map();
+    arena.addEventListener('pointerdown', e => {
+      if (!app.running || document.querySelector('dialog[open]')) return;
       e.preventDefault();
-      try { cv.setPointerCapture(e.pointerId); } catch (x) { /* なし */ }
-      g = { x0: e.clientX, y0: e.clientY, lx: e.clientX, t0: performance.now(), moved: false, soft: false };
+      const a = zoneAt(e.clientX, e.clientY);
+      try { arena.setPointerCapture(e.pointerId); } catch (x) { /* なし */ }
+      touching.set(e.pointerId, a);
+      flashZone(a);
+      press(a);
     });
-    cv.addEventListener('pointermove', e => {
-      if (!g) return;
-      const p = me(), c = p ? p.cell : 30;
-      const step = c * 0.8;
-      while (e.clientX - g.lx >= step) { g.lx += step; act(p, 'R'); g.moved = true; }
-      while (g.lx - e.clientX >= step) { g.lx -= step; act(p, 'L'); g.moved = true; }
-      const dy = e.clientY - g.y0;
-      if (dy > c * 1.2 && Math.abs(e.clientX - g.x0) < dy) { g.soft = true; g.moved = true; if (p) p.soft = true; }
-      else if (g.soft && dy < c * 0.6) { g.soft = false; if (p) p.soft = false; }
-    });
-    const end = e => {
-      if (!g) return;
-      const p = me(), c = p ? p.cell : 30;
-      const dt = performance.now() - g.t0, dy = e.clientY - g.y0, dx = e.clientX - g.x0;
-      if (p) p.soft = held.D;
-      if (!g.moved && dt < 350 && Math.abs(dx) < 10 && Math.abs(dy) < 10) act(p, 'C');
-      else if (dy > c * 2 && dt < 260) act(p, 'H');
-      g = null;
+    const up = e => {
+      const a = touching.get(e.pointerId);
+      if (!a) return;
+      touching.delete(e.pointerId);
+      release(a);
     };
-    cv.addEventListener('pointerup', end);
-    cv.addEventListener('pointercancel', () => { g = null; if (me()) me().soft = held.D; });
+    arena.addEventListener('pointerup', up);
+    arena.addEventListener('pointercancel', up);
+    arena.addEventListener('lostpointercapture', up);
+    arena.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  function zoneAt(x, y) {
+    const r = $('arena').getBoundingClientRect();
+    if (y > r.top + r.height * 0.75) return 'H';
+    const u = (x - r.left) / r.width;
+    return u < 1 / 3 ? 'L' : u > 2 / 3 ? 'R' : 'C';
+  }
+  function flashZone(a) {
+    const el = document.querySelector(`#zones [data-z="${a}"]`);
+    if (!el) return;
+    el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+  }
+  function showZones() {
+    const el = $('zones');
+    for (const d of el.children) d.classList.remove('hit');
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
   }
 
   function togglePause() {
