@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>はじけるのがみえる あわパズル</title>
+  <meta name="description" content="おなじ いろの あわを 4つ つなげて はじけさせよう。おく まえに どこが はじけるか みえるから、はじめてでも れんさが できる。くだものや やさいの キャラクターと たいせんできる おちものパズル。">
+  <meta name="theme-color" content="#dff3fb">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="あわパズル">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="solo">
+  <header class="topbar">
+    <h1 class="title"><span class="t-sub">はじけるのがみえる</span><span class="t-main">あわパズル</span></h1>
+    <nav class="top-actions">
+      <button id="btn-pause" type="button" class="chip">とめる</button>
+      <button id="btn-guide" type="button" class="chip">ルール</button>
+      <button id="btn-menu" type="button" class="chip">メニュー</button>
+    </nav>
+  </header>
+
+  <main class="layout" id="layout">
+    <div class="arena" id="arena">
+      <section class="side-me" aria-label="あなたの ばめん">
+        <div class="phead" id="head-0"></div>
+        <div class="pend" id="pend-0" aria-label="とどく くもりあわ"></div>
+        <div class="well"><canvas id="cv-0" aria-label="あなたの ばめん"></canvas></div>
+      </section>
+      <section class="side-col" aria-label="つぎ と あいて">
+        <div class="nextbox">
+          <span class="lbl">つぎ</span>
+          <canvas id="cv-next" aria-label="つぎの ふたつぐみ"></canvas>
+        </div>
+        <div class="solo-info" id="solo-info"></div>
+        <div class="opp" id="opp">
+          <div class="opp-face" id="opp-face"></div>
+          <div class="speech" id="speech"></div>
+          <div class="opp-name" id="opp-name"></div>
+          <div class="pend small" id="pend-1" aria-label="あいてに とどく くもりあわ"></div>
+          <div class="well small"><canvas id="cv-1" aria-label="あいての ばめん"></canvas></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+
+    <div class="pad" id="pad">
+      <button type="button" data-act="A" aria-label="ひだりに まわす"><i>⟲</i><small>まわす</small></button>
+      <button type="button" data-act="L" aria-label="ひだりへ"><i>◀</i><small>ひだり</small></button>
+      <button type="button" data-act="D" aria-label="はやく おとす"><i>▼</i><small>はやく</small></button>
+      <button type="button" data-act="R" aria-label="みぎへ"><i>▶</i><small>みぎ</small></button>
+      <button type="button" data-act="C" aria-label="みぎに まわす"><i>⟳</i><small>まわす</small></button>
+      <button type="button" data-act="H" aria-label="すとんと おとす" class="drop"><i>⤓</i><small>すとん</small></button>
+    </div>
+    <div class="controls">
+      <button id="btn-hint" type="button" class="big hint">ヒント</button>
+      <button id="btn-undo" type="button" class="big">まった</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" aria-live="polite"></div>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <dialog id="dlg-new">
+    <form method="dialog" class="dlg wide">
+      <h2>あたらしい ゲーム</h2>
+      <p class="welcome" id="welcome">おなじ いろの あわを <b>4つ</b> つなげると ぱちんと はじけるよ。<br>おく まえに、はじける あわが <b>ぴかぴか ひかって</b> おしえて くれるから、はじめてでも だいじょうぶ！</p>
+      <fieldset>
+        <legend>あそびかた</legend>
+        <div class="seg">
+          <label><input type="radio" name="mode" value="vs" checked><span>たいせん<small>くだもの・やさいと しょうぶ</small></span></label>
+          <label><input type="radio" name="mode" value="solo"><span>ひとりで<small>じぶんの ペースで れんしゅう</small></span></label>
+        </div>
+      </fieldset>
+      <fieldset class="vs-only">
+        <legend>たいせん あいて</legend>
+        <div class="char-grid" id="opp-grid"></div>
+        <p class="opp-intro" id="opp-intro"></p>
+      </fieldset>
+      <fieldset class="solo-only">
+        <legend>あわの いろの かず</legend>
+        <div class="seg">
+          <label><input type="radio" name="colors" value="3"><span>3しょく<small>かんたん</small></span></label>
+          <label><input type="radio" name="colors" value="4" checked><span>4しょく<small>ふつう</small></span></label>
+          <label><input type="radio" name="colors" value="5"><span>5しょく<small>むずかしい</small></span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>おちる はやさ</legend>
+        <div class="seg">
+          <label><input type="radio" name="speed" value="slow"><span>ゆっくり</span></label>
+          <label><input type="radio" name="speed" value="normal" checked><span>ふつう</span></label>
+          <label><input type="radio" name="speed" value="fast"><span>はやい</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>あなたの キャラクター</legend>
+        <div class="char-grid mini" id="me-grid"></div>
+      </fieldset>
+      <div class="dlg-buttons">
+        <button value="cancel" type="submit" id="btn-new-cancel">やめる</button>
+        <button value="ok" class="primary" type="submit">はじめる！</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-menu">
+    <form method="dialog" class="dlg menu">
+      <h2>メニュー</h2>
+      <button value="new" type="submit" class="primary">あたらしく はじめる</button>
+      <button value="retry" type="submit">おなじ あいてと もういちど</button>
+      <button value="howto" type="submit">あそびかた</button>
+      <button value="guide" type="submit">あわパズルの ルール</button>
+      <button value="settings" type="submit">せってい</button>
+      <button value="giveup" type="submit" class="danger" id="btn-giveup">こうさんする</button>
+      <button value="close" type="submit">とじる</button>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-guide">
+    <form method="dialog" class="dlg wide guide">
+      <h2>あわパズルの ルール</h2>
+      <div class="guide-grid" id="guide-list"></div>
+      <div class="dlg-buttons"><button class="primary" value="close" type="submit">とじる</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-howto">
+    <form method="dialog" class="dlg wide howto">
+      <h2>あそびかた</h2>
+      <section>
+        <h3>ふたつぐみを うごかす</h3>
+        <ul>
+          <li><b>◀ ▶</b>：ひだり・みぎに うごかす</li>
+          <li><b>⟲ ⟳</b>：くるっと まわす（かべの そばでも まわせるよ）</li>
+          <li><b>▼</b>：おしている あいだ はやく おちる。<b>⤓ すとん</b>：いっきに おとす</li>
+        </ul>
+        <p>ばめんを <b>ゆびで なぞって</b> も うごかせるよ。よこに なぞると いどう、タッチで まわす、したに はらうと すとん。</p>
+        <p>キーボード：← → いどう、↑ か X で まわす、Z で ぎゃくに まわす、↓ で はやく、スペースで すとん、P で とめる。</p>
+      </section>
+      <section>
+        <h3>みえる おたすけ</h3>
+        <ul>
+          <li><b>おちる ばしょ</b>：うすい あわ が、いま おとすと どこに つくかを みせて くれるよ。</li>
+          <li><b>はじける よそう</b>：そこに おくと はじける あわが <b>ぴかぴか</b> ひかって、「2れんさ に なるよ」と おしえて くれるよ。</li>
+          <li><b>つながり</b>：となりあう おなじ いろの あわは、くっついて みえるよ。あと いくつで はじけるか わかるね。</li>
+          <li><b>ヒント</b>：まよったら おしてみよう。おすすめの ばしょが てんせんで でるよ。</li>
+          <li><b>まった</b>：ひとりで あそぶ ときは、おいた あわを なんかいでも もどせるよ。</li>
+        </ul>
+      </section>
+      <section>
+        <h3>たいせん</h3>
+        <p>あわを はじけさせると、あいての ばめんに <b>くもりあわ</b> が ふっていくよ。れんさ すると たくさん おくれる！ さきに うえまで つまった ほうが まけ。</p>
+      </section>
+      <div class="dlg-buttons"><button class="primary" value="close" type="submit">わかった！</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-settings">
+    <form method="dialog" class="dlg">
+      <h2>せってい</h2>
+      <label class="toggle"><input type="checkbox" name="ghost"><span>おちる ばしょ を みせる</span></label>
+      <label class="toggle"><input type="checkbox" name="preview"><span>はじける よそう（はじける あわを ひからせる）</span></label>
+      <label class="toggle"><input type="checkbox" name="marks"><span>あわに マーク（いろが わかりにくい ときに）</span></label>
+      <label class="toggle"><input type="checkbox" name="sound"><span>おと</span></label>
+      <label class="toggle"><input type="checkbox" name="vibrate"><span>ぶるっと ふるえる（くもりあわが ふったとき）</span></label>
+      <div class="dlg-buttons"><button class="primary" value="close" type="submit">とじる</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-result">
+    <form method="dialog" class="dlg result">
+      <div class="result-face" id="result-face"></div>
+      <h2 id="result-title"></h2>
+      <p id="result-text"></p>
+      <div id="result-score"></div>
+      <div class="dlg-buttons">
+        <button value="close" type="submit">ばめんを みる</button>
+        <button value="undo" type="submit" id="btn-result-undo">まった</button>
+        <button value="next" type="submit" class="primary" id="btn-result-next">つぎの あいて</button>
+        <button value="retry" type="submit" id="btn-result-retry">もういちど</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="js/rules.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/chars.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
