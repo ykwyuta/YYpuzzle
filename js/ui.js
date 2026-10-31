@@ -429,7 +429,7 @@
     if (!workerOK) return null;
     if (!worker) {
       try {
-        worker = new Worker('js/worker.js?v=20261031c');
+        worker = new Worker('js/worker.js?v=20261031d');
         worker.onmessage = e => { const j = jobs.get(e.data.id); jobs.delete(e.data.id); if (j) j.resolve(e.data.result); };
         worker.onerror = () => {
           // file:// などで Worker が つかえない ときは 画面がわで かんがえる
@@ -1352,35 +1352,37 @@
       const map = { ArrowLeft: 'L', ArrowRight: 'R', ArrowDown: 'D' };
       if (map[e.key]) release(map[e.key]);
     });
-    // がめんを タップ：ひだりがわ = ひだりへ、みぎがわ = みぎへ、まんなか = まわす、した = すとん
-    // （ひだり・みぎ は おしたままに すると つづけて うごく）
-    const arena = $('arena');
-    const touching = new Map();
-    arena.addEventListener('pointerdown', e => {
-      if (!app.running || document.querySelector('dialog[open]')) return;
+    // ばめんを なぞる：よこ = いどう、タッチ = まわす、したに はらう = すとん、したに ひっぱる = はやく
+    const cv = $('cv-0');
+    let g = null;
+    cv.addEventListener('pointerdown', e => {
       e.preventDefault();
-      const a = zoneAt(e.clientX, e.clientY);
-      try { arena.setPointerCapture(e.pointerId); } catch (x) { /* なし */ }
-      touching.set(e.pointerId, a);
-      press(a);
+      try { cv.setPointerCapture(e.pointerId); } catch (x) { /* なし */ }
+      g = { x0: e.clientX, y0: e.clientY, lx: e.clientX, t0: performance.now(), moved: false, soft: false };
     });
-    const up = e => {
-      const a = touching.get(e.pointerId);
-      if (!a) return;
-      touching.delete(e.pointerId);
-      release(a);
+    cv.addEventListener('pointermove', e => {
+      if (!g) return;
+      const p = me(), c = p ? p.cell : 30;
+      const step = c * 0.8;
+      while (e.clientX - g.lx >= step) { g.lx += step; act(p, 'R'); g.moved = true; }
+      while (g.lx - e.clientX >= step) { g.lx -= step; act(p, 'L'); g.moved = true; }
+      const dy = e.clientY - g.y0;
+      if (dy > c * 1.2 && Math.abs(e.clientX - g.x0) < dy) { g.soft = true; g.moved = true; if (p) p.soft = true; }
+      else if (g.soft && dy < c * 0.6) { g.soft = false; if (p) p.soft = false; }
+    });
+    const end = e => {
+      if (!g) return;
+      const p = me(), c = p ? p.cell : 30;
+      const dt = performance.now() - g.t0, dy = e.clientY - g.y0, dx = e.clientX - g.x0;
+      if (p) p.soft = held.D;
+      if (!g.moved && dt < 350 && Math.abs(dx) < 10 && Math.abs(dy) < 10) act(p, 'C');
+      else if (dy > c * 2 && dt < 260) act(p, 'H');
+      g = null;
     };
-    arena.addEventListener('pointerup', up);
-    arena.addEventListener('pointercancel', up);
-    arena.addEventListener('lostpointercapture', up);
-    arena.addEventListener('contextmenu', e => e.preventDefault());
+    cv.addEventListener('pointerup', end);
+    cv.addEventListener('pointercancel', () => { g = null; if (me()) me().soft = held.D; });
   }
-  function zoneAt(x, y) {
-    const r = $('arena').getBoundingClientRect();
-    if (y > r.top + r.height * 0.75) return 'H';
-    const u = (x - r.left) / r.width;
-    return u < 1 / 3 ? 'L' : u > 2 / 3 ? 'R' : 'C';
-  }
+
   function togglePause() {
     if (!app.running || app.over) return;
     app.paused = !app.paused;
