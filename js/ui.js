@@ -1136,7 +1136,35 @@
 
   // ---------- おと ----------
 
+  // スマホ（とくに iPhone・iPad）は、ゆびを はなした とき・タップ・キーの なかで ないと おとを だせない。
+  // そこで、そういう そうさの たびに おとの しくみを おこす（いちど うごけば あとは そのまま なる）。
   let actx = null;
+  function audio() {
+    if (!actx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      actx = new AC();
+    }
+    return actx;
+  }
+  function unlockAudio() {
+    if (!app.settings.sound) return;
+    try {
+      // iPhone の マナースイッチが オンでも ゲームの おとを ならす（おとを けすのは「せってい」で）
+      if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback';
+      const c = audio();
+      if (!c || c.state === 'running') return;
+      const pr = c.resume();
+      if (pr && pr.catch) pr.catch(() => {});
+      // むおんの おとを 1かい ならすと、iPhone でも うごきだす
+      const src = c.createBufferSource();
+      src.buffer = c.createBuffer(1, 1, 22050);
+      src.connect(c.destination);
+      src.start(0);
+    } catch (e) { /* おとが でない かんきょう では なにもしない */ }
+  }
+  for (const ev of ['touchend', 'pointerup', 'click', 'keydown']) document.addEventListener(ev, unlockAudio, { capture: true, passive: true });
+
   function tone(freq, start, dur, type, vol, slide) {
     const t0 = actx.currentTime + start;
     const o = actx.createOscillator(), g = actx.createGain();
@@ -1151,8 +1179,10 @@
   function sound(kind, k) {
     if (!app.settings.sound) return;
     try {
-      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      if (actx.state === 'suspended') actx.resume();
+      const c = audio();
+      if (!c) return;
+      // まだ おとが うごいていない ときは ならさない（あとで まとめて なりださない ように）
+      if (c.state !== 'running') { const pr = c.resume(); if (pr && pr.catch) pr.catch(() => {}); return; }
       if (kind === 'move') tone(660, 0, 0.04, 'triangle', 0.06);
       else if (kind === 'rotate') tone(880, 0, 0.06, 'triangle', 0.07, 1200);
       else if (kind === 'bump') tone(180, 0, 0.05, 'square', 0.03);
