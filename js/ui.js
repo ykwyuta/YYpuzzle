@@ -94,7 +94,6 @@
     syncPause();
     renderHeads();
     layout();
-    setTimeout(showZones, vs ? 1500 : 0);
     if (vs) {
       setOppMood('normal');
       splash();
@@ -430,7 +429,7 @@
     if (!workerOK) return null;
     if (!worker) {
       try {
-        worker = new Worker('js/worker.js');
+        worker = new Worker('js/worker.js?v=20261031c');
         worker.onmessage = e => { const j = jobs.get(e.data.id); jobs.delete(e.data.id); if (j) j.resolve(e.data.result); };
         worker.onerror = () => {
           // file:// などで Worker が つかえない ときは 画面がわで かんがえる
@@ -1363,7 +1362,6 @@
       const a = zoneAt(e.clientX, e.clientY);
       try { arena.setPointerCapture(e.pointerId); } catch (x) { /* なし */ }
       touching.set(e.pointerId, a);
-      flashZone(a);
       press(a);
     });
     const up = e => {
@@ -1383,17 +1381,6 @@
     const u = (x - r.left) / r.width;
     return u < 1 / 3 ? 'L' : u > 2 / 3 ? 'R' : 'C';
   }
-  function flashZone(a) {
-    const el = document.querySelector(`#zones [data-z="${a}"]`);
-    if (!el) return;
-    el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
-  }
-  function showZones() {
-    const el = $('zones');
-    for (const d of el.children) d.classList.remove('hit');
-    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-  }
-
   function togglePause() {
     if (!app.running || app.over) return;
     app.paused = !app.paused;
